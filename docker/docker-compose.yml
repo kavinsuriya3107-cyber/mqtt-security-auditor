@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mqtt_broker:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-security-lab-broker
+    ports:
+      - "1883:1883" # Unsecured plain listener
+      - "1884:1884" # Authenticated listener
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./aclfile:/mosquitto/config/aclfile:ro
+      # Mount a volume directory so we can write the pwfile inside it dynamically
+      - ./config_dir:/mosquitto/config/dynamic/
+    entrypoint: >
+      sh -c "
+      touch /mosquitto/config/dynamic/pwfile &&
+      mosquitto_passwd -b /mosquitto/config/dynamic/pwfile admin admin &&
+      mosquitto_passwd -b /mosquitto/config/dynamic/pwfile guest guest &&
+      echo 'Created dynamic pwfile with admin/admin and guest/guest' &&
+      exec /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
+      "

@@ -1,0 +1,14 @@
+admin:admin
+admin:password
+admin:admin123
+admin:1234
+mosquitto:mosquitto
+root:root
+root:password
+guest:guest
+mqtt:mqtt
+user:user
+service:service
+root:root123
+admin:admin1234
+┌:┌

@@ -1,0 +1,14 @@
+# ACL Rules for MQTT Security Auditor Testing
+
+# Admin user can read and write to all topics, including system topics
+user admin
+topic readwrite #
+topic readwrite $SYS/#
+
+# Guest user has restricted access to guest/# topics only
+user guest
+topic readwrite guest/#
+
+# Anonymous users (on port 1883) can read/write to factory/#
+# but cannot write to other namespaces
+pattern readwrite factory/#

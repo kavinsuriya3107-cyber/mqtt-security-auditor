@@ -1,0 +1,21 @@
+# Default scan settings for MQTT Security Auditor
+timeout: 5.0
+max_connections: 50
+wordlist: "wordlists/mqtt_defaults.txt"
+
+modules:
+  discovery:
+    enabled: true
+    ports: [1883, 1884, 8883]
+  auth:
+    enabled: true
+  topics:
+    enabled: true
+    capture_time: 5.0
+  acl:
+    enabled: true
+    test_topic: "factory/zone2/cnc/cmd"
+  tls_audit:
+    enabled: true
+  dos:
+    enabled: false # Keep disabled by default to avoid accidental disruption
