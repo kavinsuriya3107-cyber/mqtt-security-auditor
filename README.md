@@ -38,7 +38,7 @@ MQTT Security Auditor scans a target MQTT broker and automatically checks for cr
 
 ### Install from source
 ```bash
-git clone https://github.com/YOUR_USERNAME/mqtt-security-auditor.git
+git clone https://github.com/kavinsuriya3107-cyber/mqtt-security-auditor.git
 cd mqtt-security-auditor
 pip install -e .
 ```
