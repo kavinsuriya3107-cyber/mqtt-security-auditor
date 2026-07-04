@@ -17,6 +17,8 @@ services:
       touch /mosquitto/config/dynamic/pwfile &&
       mosquitto_passwd -b /mosquitto/config/dynamic/pwfile admin admin &&
       mosquitto_passwd -b /mosquitto/config/dynamic/pwfile guest guest &&
+      chown -R mosquitto:mosquitto /mosquitto/config/dynamic/ &&
+      chmod 644 /mosquitto/config/dynamic/pwfile &&
       echo 'Created dynamic pwfile with admin/admin and guest/guest' &&
       exec /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf
       "
