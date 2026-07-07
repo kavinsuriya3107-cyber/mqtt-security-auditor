@@ -1,21 +1,63 @@
-# Default scan settings for MQTT Security Auditor
-timeout: 5.0
-max_connections: 50
-wordlist: "wordlists/mqtt_defaults.txt"
+# ──────────────────────────────────────────────────────────────────
+# MQTT Security Auditor — Default Scan Configuration
+# ──────────────────────────────────────────────────────────────────
+#
+# This file contains the default settings for all audit modules.
+# Override any value by creating a custom YAML file and passing it
+# with the --config flag:
+#
+#   mqtt-auditor scan --target 192.168.1.50 --config my_profile.yaml
+#
+# You can also override specific values using environment variables:
+#   MQTT_AUDITOR_TIMEOUT=10.0
+#   MQTT_AUDITOR_WORDLIST=/path/to/custom_wordlist.txt
+#   MQTT_AUDITOR_PORTS=1883,8883
+# ──────────────────────────────────────────────────────────────────
 
+# Global Settings
+timeout: 5.0                    # Seconds to wait for network responses
+max_connections: 50             # Max simultaneous connections for DoS test
+wordlist: "wordlists/mqtt_defaults.txt"   # Path to credential dictionary
+
+# Module Settings
 modules:
+
+  # Module 1: Broker Discovery
+  # Scans TCP ports and verifies MQTT protocol via raw CONNECT packets
   discovery:
     enabled: true
-    ports: [1883, 1884, 8883]
+    ports: [1883, 1884, 8883, 8884, 9001]
+    # 1883  = Standard MQTT (plaintext)
+    # 1884  = Alternative MQTT (some brokers use for auth-required)
+    # 8883  = MQTT over TLS (encrypted)
+    # 8884  = Alternative MQTT over TLS
+    # 9001  = MQTT over WebSockets
+
+  # Module 2: Authentication Testing
+  # Tests anonymous access and brute-forces default credentials
   auth:
     enabled: true
+    timeout: 2.0          # Timeout for credential testing (seconds)
+
+  # Module 3: Topic Analysis
+  # Subscribes to '#' wildcard and '$SYS/#' to test topic restrictions
   topics:
     enabled: true
-    capture_time: 5.0
+    capture_time: 5.0     # Seconds to listen for messages
+
+  # Module 4: ACL Verification
+  # Tests publish/subscribe isolation between users
   acl:
     enabled: true
-    test_topic: "factory/zone2/cnc/cmd"
+
+  # Module 5: TLS/Crypto Audit
+  # Checks TLS versions, cipher suites, and certificate validity
   tls_audit:
     enabled: true
+    timeout: 5.0          # Timeout for TLS handshake (seconds)
+
+  # Module 6: DoS Resilience
+  # Tests connection limits, payload sizes, and rate limiting
+  # WARNING: Can disrupt production brokers. Enable ONLY with authorization.
   dos:
-    enabled: false # Keep disabled by default to avoid accidental disruption
+    enabled: false
