@@ -41,6 +41,7 @@ class DiscoveryModule(BaseAuditModule):
             "ports": {},
             "mqtt_confirmed": False,
             "tls_available": False,
+            "tls_ports": [],
             "broker_info": None,
             "connack_code": None
         }
@@ -79,18 +80,25 @@ class DiscoveryModule(BaseAuditModule):
 
         # ──────────────────────────────────────────────
         # PHASE 3: TLS Availability Check
-        # Attempts SSL handshake on port 8883
+        # Attempts SSL handshake on all candidate TLS ports
         # ──────────────────────────────────────────────
-        if 8883 in open_ports:
-            tls_info = self._check_tls(self.target, 8883, timeout)
-            self.results["tls_available"] = tls_info["success"]
+        tls_candidate_ports = [p for p in open_ports if p not in [1883, 1884]]
+        tls_successes = []
+
+        for port in tls_candidate_ports:
+            tls_info = self._check_tls(self.target, port, timeout)
             if tls_info["success"]:
-                self.results["broker_info"] = tls_info
-                print(f"  [+] TLS available on port 8883")
+                tls_successes.append((port, tls_info))
+                print(f"  [+] TLS available on port {port}")
                 print(f"      Protocol: {tls_info.get('protocol', 'unknown')}")
                 print(f"      Cipher: {tls_info.get('cipher', 'unknown')}")
             else:
-                print(f"  [-] TLS handshake FAILED on port 8883: {tls_info.get('error')}")
+                print(f"  [-] TLS handshake FAILED on port {port}: {tls_info.get('error')}")
+
+        if tls_successes:
+            self.results["tls_available"] = True
+            self.results["tls_ports"] = [port for port, _ in tls_successes]
+            self.results["broker_info"] = tls_successes[0][1]
 
         # ──────────────────────────────────────────────
         # PHASE 4: Register findings with the Risk Scorer
