@@ -30,13 +30,16 @@ class AuthModule(BaseAuditModule):
     def run(self):
         print(f"[*] Running {self.name} against {self.target}...")
 
-        # Read ports, wordlist path, and timeout from config
-        timeout = self.config.get("timeout", 5.0)
+        # Read configuration values (config-driven design)
         wordlist_path = self.config.get("wordlist", "wordlists/mqtt_defaults.txt")
         module_config = self.config.get("modules", {}).get("auth", {})
+        
+        # Read timeout from module config, or fall back to global timeout
+        timeout = module_config.get("timeout", self.config.get("timeout", 2.0))
 
-        # Default ports to check (1883 and 1884 are plaintext ports where we test credentials)
-        ports = [1883, 1884]
+        # Get ports from context (discovery module) or fall back to defaults
+        # This chains Discovery → Auth
+        ports = self.context.get("open_ports", [1883, 1884])
 
         self.results = {
             "anonymous_allowed": {},
@@ -48,7 +51,7 @@ class AuthModule(BaseAuditModule):
         # ──────────────────────────────────────────────
         for port in ports:
             print(f"  [*] Testing anonymous access on port {port}...")
-            anon_status = self._test_credentials(self.target, port, username=None, password=None, timeout=2.0)
+            anon_status = self._test_credentials(self.target, port, username=None, password=None, timeout=timeout)
             
             if anon_status["success"]:
                 self.results["anonymous_allowed"][str(port)] = True
@@ -78,7 +81,7 @@ class AuthModule(BaseAuditModule):
             
             for username, password in credentials_to_test:
                 # Debug logging to show progress
-                status = self._test_credentials(self.target, port, username, password, timeout=2.0)
+                status = self._test_credentials(self.target, port, username, password, timeout=timeout)
                 
                 if status["success"]:
                     print(f"  [+] SUCCESS: Found credentials [{username}:{password}] on port {port}!")
@@ -100,7 +103,7 @@ class AuthModule(BaseAuditModule):
     # HELPER METHODS
     # ================================================================
 
-    def _test_credentials(self, host, port, username=None, password=None, timeout=2.0):
+    def _test_credentials(self, host, port, username=None, password=None, timeout=None):
         """
         Attempts to connect to the broker using paho-mqtt client with optional credentials.
 
@@ -109,7 +112,7 @@ class AuthModule(BaseAuditModule):
             port: Port number (1883/1884)
             username: Optional username
             password: Optional password
-            timeout: Maximum seconds to wait for CONNACK handshake
+            timeout: Maximum seconds to wait for CONNACK handshake (uses config if None)
 
         Returns:
             dict containing:
@@ -117,6 +120,11 @@ class AuthModule(BaseAuditModule):
               - code (int): The CONNACK return code (0 = success, 4 = bad credentials, etc.)
               - error (str): Error message if socket/protocol failed
         """
+        # Use provided timeout or read from config
+        if timeout is None:
+            module_config = self.config.get("modules", {}).get("auth", {})
+            timeout = module_config.get("timeout", self.config.get("timeout", 2.0))
+        
         status = {"success": False, "code": None, "error": None}
 
         # Initialize paho client.
