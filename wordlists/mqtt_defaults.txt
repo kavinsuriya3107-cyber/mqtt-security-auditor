@@ -1,14 +1,61 @@
+# ──────────────────────────────────────────────────────────────────
+# MQTT Default Credentials Wordlist
+# ──────────────────────────────────────────────────────────────────
+# Format: username:password (one pair per line)
+# Lines starting with '#' are comments and will be ignored.
+#
+# Sources:
+#   - Vendor default credentials from Mosquitto, HiveMQ, VerneMQ, EMQX
+#   - Common IoT device defaults (Mirai botnet wordlist subset)
+#   - OWASP IoT Top 10 recommended test credentials
+# ──────────────────────────────────────────────────────────────────
+
+# Mosquitto / Eclipse defaults
 admin:admin
 admin:password
 admin:admin123
 admin:1234
+admin:12345
+admin:123456
+admin:admin1234
+admin:mqtt
+admin:broker
+
+# Common service accounts
 mosquitto:mosquitto
+mqtt:mqtt
+service:service
+user:user
+user:password
+user:1234
+test:test
+demo:demo
+
+# Root/superuser defaults
 root:root
 root:password
-guest:guest
-mqtt:mqtt
-user:user
-service:service
 root:root123
-admin:admin1234
-┌:┌
+root:toor
+root:admin
+
+# Guest/anonymous accounts
+guest:guest
+guest:password
+guest:1234
+
+# HiveMQ defaults
+hivemq:hivemq
+
+# VerneMQ defaults
+vernemq:vernemq
+
+# EMQX defaults
+emqx:public
+dashboard:public
+
+# Industrial IoT / SCADA defaults
+operator:operator
+engineer:engineer
+supervisor:supervisor
+plc:plc
+scada:scada
