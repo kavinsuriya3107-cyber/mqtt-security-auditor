@@ -29,3 +29,4 @@ ENV/
 # Local testing reports and dynamic files
 reports/
 docker/config_dir/
+docker/certs/

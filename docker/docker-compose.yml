@@ -7,11 +7,13 @@ services:
     ports:
       - "1883:1883" # Unsecured plain listener
       - "1884:1884" # Authenticated listener
+      - "8883:8883" 
     volumes:
       - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./aclfile:/mosquitto/config/aclfile:ro
       # Mount a volume directory so we can write the pwfile inside it dynamically
       - ./config_dir:/mosquitto/config/dynamic/
+      - ./certs:/mosquitto/certs:ro
     entrypoint: >
       sh -c "
       touch /mosquitto/config/dynamic/pwfile &&
